@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACID_WARP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            overflow: hidden;
+            background-color: #000;
+            font-family: monospace;
+            color: #fff;
+            cursor: none;
+        }
+        
+        #canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+        
+        .ui-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 2;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            mix-blend-mode: difference;
+        }
+        
+        .center-text {
+            font-size: 10vw;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-align: center;
+            letter-spacing: -0.03em;
+            animation: pulse 2s infinite alternate;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+        
+        .floating-text {
+            position: absolute;
+            font-size: 3vw;
+            white-space: nowrap;
+            animation: float 20s linear infinite;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateX(100vw) translateY(var(--y)) rotate(var(--r));
+            }
+            100% {
+                transform: translateX(-100vw) translateY(var(--y)) rotate(calc(var(--r) * -1));
+            }
+        }
+        
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%);
+            mix-blend-mode: difference;
+            pointer-events: none;
+            z-index: 9999;
+            filter: hue-rotate(0deg);
+            animation: cursor-hue-rotate 2s linear infinite;
+        }
+        
+        @keyframes cursor-hue-rotate {
+            0% {
+                filter: hue-rotate(0deg);
+            }
+            100% {
+                filter: hue-rotate(360deg);
+            }
+        }
+        
+        .cursor-trail {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.7;
+            mix-blend-mode: screen;
+        }
+        
+        .control-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+            pointer-events: auto;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid white;
+            padding: 5px 10px;
+            font-family: monospace;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .back-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            opacity: 0.5;
+            z-index: 100;
+            pointer-events: auto;
+            font-family: monospace;
+            transition: opacity 0.3s;
+            mix-blend-mode: difference;
+        }
+        
+        .back-link:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <a href="./index.html" class="back-link">← REALITY</a>
+    
+    <canvas id="canvas"></canvas>
+    
+    <div class="ui-layer">
+        <div class="center-text">ACID_WARP</div>
+    </div>
+    
+    <div class="control-panel">
+        <button class="control-btn" id="toggle-mode">TOGGLE MODE</button>
+        <button class="control-btn" id="color-shift">COLOR SHIFT</button>
+        <button class="control-btn" id="add-text">ADD TEXT</button>
+    </div>
+    
+    <div class="custom-cursor"></div>
+    
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        // Custom cursor
+        const cursor = document.querySelector('.custom-cursor');
+        const cursorTrails = [];
+        const MAX_TRAILS = 15;
+        
+        // Track mouse position
+        let mouseX = 0;
+        let mouseY = 0;
+        
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            // Move cursor
+            cursor.style.left = mouseX + 'px';
+            cursor.style.top = mouseY + 'px';
+            
+            // Create trail
+            createTrail(mouseX, mouseY);
+        });
+        
+        function createTrail(x, y) {
+            if (cursorTrails.length >= MAX_TRAILS) {
+                // Remove oldest trail
+                const oldestTrail = cursorTrails.shift();
+                oldestTrail.remove();
+            }
+            
+            const trail = document.createElement('div');
+            trail.className = 'cursor-trail';
+            trail.style.left = x + 'px';
+            trail.style.top = y + 'px';
+            trail.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+            document.body.appendChild(trail);
+            
+            // Add to trails array
+            cursorTrails.push(trail);
+            
+            // Fade out and remove
+            setTimeout(() => {
+                trail.style.transition = 'opacity 0.5s, transform 0.5s';
+                trail.style.opacity = '0';
+                trail.style.transform = 'translate(-50%, -50%) scale(0.5)';
+                
+                setTimeout(() => {
+                    const index = cursorTrails.indexOf(trail);
+                    if (index > -1) {
+                        cursorTrails.splice(index, 1);
+                    }
+                    trail.remove();
+                }, 500);
+            }, 100);
+        }
+        
+        // Add floating text elements
+        function addFloatingText() {
+            const words = ['WARP', 'TRIPPY', 'PSYCHE', 'VOID', 'FLUX', 'DREAM', 'ACID', 'MIND', 'SPACE', 'TIME'];
+            const text = document.createElement('div');
+            text.className = 'floating-text';
+            text.textContent = words[Math.floor(Math.random() * words.length)];
+            
+            // Random vertical position and rotation
+            const yPos = Math.random() * 100 - 50;
+            const rotation = Math.random() * 20 - 10;
+            text.style.setProperty('--y', `${yPos}vh`);
+            text.style.setProperty('--r', `${rotation}deg`);
+            
+            // Random color
+            text.style.color = `hsl(${Math.random() * 360}, 100%, 70%)`;
+            
+            document.querySelector('.ui-layer').appendChild(text);
+            
+            // Remove after animation completes
+            setTimeout(() => {
+                text.remove();
+            }, 20000);
+        }
+        
+        // Add some initial floating text
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => {
+                addFloatingText();
+            }, i * 2000);
+        }
+        
+        // Add more floating text periodically
+        setInterval(() => {
+            addFloatingText();
+        }, 5000);
+        
+        // ========================
+        // ACID GRAPHICS ANIMATION
+        // ========================
+        
+        // Animation variables
+        let time = 0;
+        let mode = 0;
+        let colorShift = 0;
+        
+        // Animation function
+        function animate() {
+            time += 0.01;
+            
+            // Clear canvas
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Choose animation mode
+            switch (mode) {
+                case 0:
+                    drawWarpField();
+                    break;
+                case 1:
+                    drawSpiral();
+                    break;
+                case 2:
+                    drawPulsingGrid();
+                    break;
+                case 3:
+                    drawWavePattern();
+                    break;
+                default:
+                    drawWarpField();
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Different acid graphic animations
+        function drawWarpField() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            for (let i = 0; i < 100; i++) {
+                const angle = i * Math.PI * 2 / 100;
+                const radius = 100 + Math.sin(time * 2 + i * 0.1) * 50;
+                
+                const x1 = centerX + Math.cos(angle) * radius;
+                const y1 = centerY + Math.sin(angle) * radius;
+                
+                const x2 = centerX + Math.cos(angle + Math.PI / 2) * radius;
+                const y2 = centerY + Math.sin(angle + Math.PI / 2) * radius;
+                
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.strokeStyle = `hsl(${(i * 3.6 + time * 50 + colorShift) % 360}, 100%, 50%)`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+        
+        function drawSpiral() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            for (let i = 0; i < 200; i++) {
+                const rad = i * 0.5;
+                const angle = time * 2 + i * 0.05;
+                const x = centerX + Math.cos(angle) * rad;
+                const y = centerY + Math.sin(angle) * rad;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 2 + Math.sin(time + i * 0.1) * 2, 0, Math.PI * 2);
+                ctx.fillStyle = `hsl(${(i * 1.8 + time * 50 + colorShift) % 360}, 100%, 50%)`;
+                ctx.fill();
+            }
+        }
+        
+        function drawPulsingGrid() {
+            const gridSize = 20;
+            const cellSize = Math.max(canvas.width, canvas.height) / gridSize;
+            
+            for (let x = 0; x < gridSize; x++) {
+                for (let y = 0; y < gridSize; y++) {
+                    const posX = x * cellSize;
+                    const posY = y * cellSize;
+                    
+                    const wave = Math.sin(time + x * 0.2 + y * 0.2) * 0.5 + 0.5;
+                    const size = cellSize * 0.8 * wave;
+                    
+                    ctx.beginPath();
+                    ctx.rect(posX + (cellSize - size) / 2, posY + (cellSize - size) / 2, size, size);
+                    ctx.fillStyle = `hsl(${(x * 10 + y * 10 + time * 50 + colorShift) % 360}, 100%, 50%)`;
+                    ctx.fill();
+                }
+            }
+        }
+        
+        function drawWavePattern() {
+            const steps = 50;
+            const waveHeight = canvas.height / 10;
+            
+            for (let i = 0; i < steps; i++) {
+                ctx.beginPath();
+                
+                for (let x = 0; x < canvas.width; x += 5) {
+                    const y = canvas.height / 2 
+                        + Math.sin(x * 0.01 + time + i * 0.2) * waveHeight
+                        + Math.cos(x * 0.02 - time * 2) * waveHeight / 2
+                        + i * 10 - steps * 5;
+                    
+                    if (x === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                
+                ctx.strokeStyle = `hsl(${(i * 7.2 + time * 50 + colorShift) % 360}, 100%, 50%)`;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            }
+        }
+        
+        // Control buttons
+        document.getElementById('toggle-mode').addEventListener('click', () => {
+            mode = (mode + 1) % 4;
+        });
+        
+        document.getElementById('color-shift').addEventListener('click', () => {
+            colorShift = (colorShift + 90) % 360;
+        });
+        
+        document.getElementById('add-text').addEventListener('click', () => {
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    addFloatingText();
+                }, i * 200);
+            }
+        });
+        
+        // Start animation
+        animate();
+        
+        // Secret backdoor to your design archive
+        const secretCode = [];
+        const correctCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        
+        document.addEventListener('keydown', (e) => {
+            secretCode.push(e.key);
+            
+            if (secretCode.length > correctCode.length) {
+                secretCode.shift();
+            }
+            
+            if (JSON.stringify(secretCode) === JSON.stringify(correctCode)) {
+                window.location.href = './index.html';
+            }
+        });
+    </script>
+</body>
+</html>
