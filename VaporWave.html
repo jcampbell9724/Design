@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaporwave Paradise</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Monoton&family=VT323&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            color: white;
+            font-family: 'VT323', monospace;
+            overflow-x: hidden;
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            position: relative;
+        }
+        
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%);
+            background-size: 100% 4px;
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0.3;
+            animation: scanline-move 10s linear infinite;
+        }
+        
+        @keyframes scanline-move {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 0 100%;
+            }
+        }
+        
+        .vhs-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(255,0,255,0.03) 33%, rgba(0,255,255,0.03) 66%, rgba(255,255,0,0.03) 100%);
+            background-size: 300% 100%;
+            animation: vhs-colors 10s linear infinite;
+            z-index: 11;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+        
+        @keyframes vhs-colors {
+            0% {
+                background-position: 0% 0%;
+            }
+            100% {
+                background-position: 100% 0%;
+            }
+        }
+        
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        .noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.05;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .grid-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: repeating-conic-gradient(#9932CC 0% 25%, #000 25% 50%);
+            background-size: 50px 50px;
+            z-index: 0;
+            transform: perspective(500px) rotateX(60deg);
+            transform-origin: center bottom;
+            animation: grid-move 10s linear infinite, grid-rotate 20s linear infinite;
+            opacity: 0.6;
+        }
+        
+        @keyframes grid-rotate {
+            0% {
+                transform: perspective(500px) rotateX(60deg);
+            }
+            50% {
+                transform: perspective(500px) rotateX(65deg) rotateZ(5deg);
+            }
+            100% {
+                transform: perspective(500px) rotateX(60deg);
+            }
+        }
+        
+        @keyframes grid-move {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                background-position: 0 50px;
+            }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        header {
+            text-align: center;
+            padding: 2rem 0;
+            margin-bottom: 3rem;
+        }
+        
+        h1 {
+            font-family: 'Monoton', cursive;
+            font-size: 5rem;
+            color: #fff;
+            text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff;
+            margin-bottom: 1rem;
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff;
+            }
+            to {
+                text-shadow: 0 0 20px #ff00ff, 0 0 30px #ff00ff, 0 0 40px #ff00ff, 0 0 50px #ff00ff;
+            }
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            letter-spacing: 3px;
+            color: #fff;
+            text-transform: uppercase;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1.5rem;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            padding: 5px 0;
+            transition: all 0.3s;
+        }
+        
+        nav a:hover {
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+        
+        nav a:hover::after {
+            transform: scaleX(1);
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+        
+        .card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255,0,255,0.1), rgba(0,255,255,0.1));
+            z-index: -1;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #00ffff;
+            text-shadow: 0 0 5px #00ffff;
+        }
+        
+        .card p {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+        
+        .card .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ff00ff;
+            text-shadow: 0 0 5px #ff00ff;
+        }
+        
+        .busts-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .bust {
+            position: relative;
+            width: 200px;
+            height: 250px;
+            margin: 1rem;
+            perspective: 500px;
+        }
+        
+        .bust-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: relative;
+            z-index: 2;
+            filter: hue-rotate(270deg) saturate(2) contrast(1.2);
+            animation: bust-float 6s ease-in-out infinite;
+            transform-style: preserve-3d;
+        }
+        
+        .bust-glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(153, 50, 204, 0.6) 0%, rgba(0, 0, 0, 0) 70%);
+            z-index: 1;
+            opacity: 0;
+            animation: glow-pulse 3s ease-in-out infinite;
+        }
+        
+        .bust-1 .bust-img {
+            animation-delay: 0s;
+            filter: hue-rotate(270deg) saturate(2) contrast(1.2);
+        }
+        
+        .bust-2 .bust-img {
+            animation-delay: 1s;
+            filter: hue-rotate(180deg) saturate(2) contrast(1.2);
+        }
+        
+        .bust-3 .bust-img {
+            animation-delay: 2s;
+            filter: hue-rotate(90deg) saturate(2) contrast(1.2);
+        }
+        
+        .bust-1 .bust-glow {
+            animation-delay: 0.5s;
+            background: radial-gradient(ellipse at center, rgba(153, 50, 204, 0.6) 0%, rgba(0, 0, 0, 0) 70%);
+        }
+        
+        .bust-2 .bust-glow {
+            animation-delay: 1.5s;
+            background: radial-gradient(ellipse at center, rgba(0, 255, 255, 0.6) 0%, rgba(0, 0, 0, 0) 70%);
+        }
+        
+        .bust-3 .bust-glow {
+            animation-delay: 2.5s;
+            background: radial-gradient(ellipse at center, rgba(255, 0, 255, 0.6) 0%, rgba(0, 0, 0, 0) 70%);
+        }
+        
+        @keyframes bust-float {
+            0% {
+                transform: translateY(0) rotateY(0);
+            }
+            25% {
+                transform: translateY(-15px) rotateY(5deg);
+            }
+            50% {
+                transform: translateY(0) rotateY(0);
+            }
+            75% {
+                transform: translateY(15px) rotateY(-5deg);
+            }
+            100% {
+                transform: translateY(0) rotateY(0);
+            }
+        }
+        
+        @keyframes glow-pulse {
+            0% {
+                opacity: 0.2;
+                transform: scale(0.9);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.1);
+            }
+            100% {
+                opacity: 0.2;
+                transform: scale(0.9);
+            }
+        }
+        
+        .cta {
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'VT323', monospace;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(255,0,255,0.7);
+        }
+        
+        .cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255,0,255,0.3), rgba(0,255,255,0.3));
+            z-index: -1;
+            transition: all 0.3s;
+        }
+        
+        .cta:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255,0,255,0.9);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            position: relative;
+            z-index: 2;
+        }
+        
+        footer p {
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+        
+        .glitch {
+            position: relative;
+        }
+        
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .glitch::before {
+            left: 2px;
+            text-shadow: -1px 0 #00ffff;
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+        
+        .glitch::after {
+            left: -2px;
+            text-shadow: 1px 0 #ff00ff;
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+        
+        @keyframes glitch-anim-1 {
+            0%, 100% { clip-path: inset(50% 0 50% 0); }
+            20% { clip-path: inset(20% 0 80% 0); }
+            40% { clip-path: inset(80% 0 20% 0); }
+            60% { clip-path: inset(40% 0 60% 0); }
+            80% { clip-path: inset(60% 0 40% 0); }
+        }
+        
+        @keyframes glitch-anim-2 {
+            0%, 100% { clip-path: inset(50% 0 50% 0); }
+            25% { clip-path: inset(30% 0 70% 0); }
+            50% { clip-path: inset(70% 0 30% 0); }
+            75% { clip-path: inset(10% 0 90% 0); }
+        }
+        
+        .palm {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 25C30 25 20 40 20 60S35 80 50 60S65 35 80 60S70 80 50 75' stroke='white' fill='none' stroke-width='1'/%3E%3C/svg%3E");
+            background-size: 200px;
+            background-repeat: repeat-x;
+            opacity: 0.3;
+            z-index: 1;
+            transform: translateY(50px);
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3rem;
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            nav a {
+                margin: 0.5rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="noise"></div>
+    <div class="grid-background"></div>
+    <div class="palm"></div>
+    <div class="vhs-effect"></div>
+    
+    <div class="container">
+        <header>
+            <h1 class="glitch" data-text="ＶＡＰＯＲＷＡＶＥ">ＶＡＰＯＲＷＡＶＥ</h1>
+            <p class="subtitle">Ａｅｓｔｈｅｔｉｃｓ ｏｆ ｔｈｅ ｆｕｔｕｒｅ ｐａｓｔ</p>
+        </header>
+        
+        <nav>
+            <a href="#">Ｈｏｍｅ</a>
+            <a href="#">Ａｂｏｕｔ</a>
+            <a href="#">Ｇａｌｌｅｒｙ</a>
+            <a href="#">Ｃｏｎｔａｃｔ</a>
+        </nav>
+        
+        <div class="busts-container">
+            <div class="bust bust-1">
+                <img src="/api/placeholder/200/250" alt="Vaporwave Bust 1" class="bust-img">
+                <div class="bust-glow"></div>
+            </div>
+            <div class="bust bust-2">
+                <img src="/api/placeholder/200/250" alt="Vaporwave Bust 2" class="bust-img">
+                <div class="bust-glow"></div>
+            </div>
+            <div class="bust bust-3">
+                <img src="/api/placeholder/200/250" alt="Vaporwave Bust 3" class="bust-img">
+                <div class="bust-glow"></div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="card">
+                <div class="icon">♢</div>
+                <h2>Ｎｏｓｔａｌｇｉａ</h2>
+                <p>Ｅｍｂｒａｃｅ ｔｈｅ ｄｒｅａｍｌｉｋｅ ｍｅｍｏｒｉｅｓ ｏｆ ａ ｆｕｔｕｒｅ ｔｈａｔ ｎｅｖｅｒ ｈａｐｐｅｎｅｄ.</p>
+                <button class="cta">Ｅｘｐｌｏｒｅ</button>
+            </div>
+            
+            <div class="card">
+                <div class="icon">◇</div>
+                <h2>Ａｅｓｔｈｅｔｉｃｓ</h2>
+                <p>Ｄｉｓｃｏｖｅｒ ｔｈｅ ｐｅｒｆｅｃｔ ｂａｌａｎｃｅ ｏｆ ｄｉｇｉｔａｌ ａｎｄ ａｎａｌｏｇ ｗｏｒｌｄｓ.</p>
+                <button class="cta">Ｄｉｓｃｏｖｅｒ</button>
+            </div>
+            
+            <div class="card">
+                <div class="icon">☆</div>
+                <h2>Ｒｅｔｒｏｗａｖｅ</h2>
+                <p>Ｅｘｐｅｒｉｅｎｃｅ ｔｈｅ ｓｕｎｓｅｔｓ ａｎｄ ｐａｌｍ ｔｒｅｅｓ ｏｆ ａｎ ｉｄｅａｌｉｚｅｄ ｐａｓｔ.</p>
+                <button class="cta">Ｅｘｐｅｒｉｅｎｃｅ</button>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2025 ＶＡＰＯＲＷＡＶＥ ＰＡＲＡＤＩＳＥ | Ａｌｌ ｒｉｇｈｔｓ ｒｅｓｅｒｖｅｄ</p>
+    </footer>
+    
+    <script>
+        // Add glitch effect on hover
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                setTimeout(() => {
+                    card.style.transform = 'translateY(-15px) skewX(2deg)';
+                }, 100);
+                setTimeout(() => {
+                    card.style.transform = 'translateY(-10px) skewX(-1deg)';
+                }, 200);
+                setTimeout(() => {
+                    card.style.transform = 'translateY(-10px) skewX(0deg)';
+                }, 300);
+            });
+        });
+        
+        // Add VHS scanlines effect
+        const scanlines = document.createElement('div');
+        scanlines.classList.add('scanlines');
+        document.body.appendChild(scanlines);
+        
+        // Add random glitch animations to busts
+        const busts = document.querySelectorAll('.bust-img');
+        setInterval(() => {
+            const randomBust = busts[Math.floor(Math.random() * busts.length)];
+            randomBust.style.clipPath = `inset(${Math.random() * 10}% 0 ${Math.random() * 10}% 0)`;
+            setTimeout(() => {
+                randomBust.style.clipPath = 'inset(0 0 0 0)';
+            }, 100);
+        }, 3000);
+        
+        // Random color flicker for headers
+        const headers = document.querySelectorAll('h1, h2');
+        setInterval(() => {
+            const randomHeader = headers[Math.floor(Math.random() * headers.length)];
+            const originalColor = randomHeader.style.color;
+            randomHeader.style.color = '#00ffff';
+            setTimeout(() => {
+                randomHeader.style.color = originalColor;
+            }, 100);
+        }, 2000);
+    </script>
+</body>
+</html>
